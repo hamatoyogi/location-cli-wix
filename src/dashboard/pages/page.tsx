@@ -7,21 +7,21 @@ import {
 } from '@wix/design-system';
 import '@wix/design-system/styles.global.css';
 import React, { useEffect } from 'react';
-import { withDashboard, useDashboard } from '@wix/dashboard-react';
+import { withDashboard } from '@wix/dashboard-react';
 import { Coord, Location } from '../../types';
 import { navigateToSettings } from '../../dashboard-sdk';
-import {
-  WixProvider,
-  OAuthStrategy,
-  useWixModules,
-  useWixFetch,
-} from '@wix/sdk-react';
+import { WixProvider, OAuthStrategy, useWixFetch } from '@wix/sdk-react';
 import { getDistance } from '../../utils';
 
 function Index() {
-  const { showToast } = useDashboard();
   const [locations, setLocations] = React.useState<Location[]>([]);
-  const [currentLocation, setCurrentLocation] = React.useState<Coord>();
+  const [currentLocation, setCurrentLocation] = React.useState<Coord>({
+    // setting Tel Aviv geo location as default
+    // as the Wix dashboard iframe doesn't support geolocation
+    // https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-permissions-in-cross-origin-iframes
+    latitude: 32.0852997,
+    longitude: 34.7818064,
+  });
   const fetch = useWixFetch();
 
   const columns = [
@@ -39,7 +39,7 @@ function Index() {
     {
       title: 'Distance',
       render: (row: Location) =>
-        getDistance(row.address.geocode, currentLocation),
+        `${getDistance(row.address.geocode, currentLocation).toFixed(2)} km`,
     },
   ];
 
@@ -115,9 +115,6 @@ function Index() {
                 <p>Loading....</p>
               )}
             </Card>
-            <Button onClick={() => showToast({ message: 'hello world!' })}>
-              show toast
-            </Button>
           </Page.Content>
         </Page>
       </WixDesignSystemProvider>
